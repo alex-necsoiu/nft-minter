@@ -1,36 +1,65 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# nft-minter/README.md
 
-## Getting Started
+# NFT Minter
 
-First, run the development server:
+NFT Minter is a Web3 decentralized application (dApp) built using Next.js, TypeScript, TailwindCSS, and Wagmi. This application allows users to connect their wallets and mint new NFTs by providing a title, description, and image.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Table of Contents
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- [Installation](#installation)
+- [Usage](#usage)
+- [Features](#features)
+- [Environment Variables](#environment-variables)
+- [License](#license)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Installation
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Clone the repository:
 
-## Learn More
+   ```bash
+   git clone https://github.com/yourusername/nft-minter.git
+   cd nft-minter
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+2. Install the dependencies:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+   ```bash
+   npm install
+   ```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+3. Copy the `.env.example` file to `.env` and fill in the required environment variables.
 
-## Deploy on Vercel
+4. Start the development server:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+   ```bash
+   npm run dev
+   ```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+5. Open your browser and navigate to `http://localhost:3000`.
+
+## Usage
+
+- Connect your wallet using the WalletConnect component.
+- Navigate to the minting page to create a new NFT.
+- Fill in the title, description, and upload an image.
+- Click the mint button to mint your NFT. The minting function will be disabled until your wallet is connected.
+
+## Features
+
+- Wallet connection using Wagmi.
+- NFT minting functionality with error handling.
+- Image and metadata storage on IPFS via Pinata.
+- User notifications for successful or failed minting.
+
+## Environment Variables
+
+The following environment variables are required for the application to function correctly:
+
+- `NEXT_PUBLIC_CHAIN_ID`: The chain ID for the Ethereum network (e.g., 11155111 for Sepolia).
+- `NEXT_PUBLIC_ALCHEMY_ENDPOINT`: The Alchemy endpoint for connecting to the Ethereum network.
+- `NEXT_PUBLIC_NFT_ADDRESS`: The deployed ERC721 contract address.
+- `IPFS_NODE`: The IPFS node URL for storing files.
+
+## License
+
+This project is licensed under the MIT License. See the LICENSE file for more details.
