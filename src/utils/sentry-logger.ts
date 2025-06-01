@@ -1,18 +1,15 @@
 // This file contains utility functions for logging errors to a centralized logging service like Sentry.
 
-import * as Sentry from '@sentry/react';
-import { Integrations } from '@sentry/tracing';
+import * as Sentry from '@sentry/nextjs';
 
 /**
  * Initializes Sentry for error tracking.
  * @param {string} dsn - The Data Source Name for Sentry.
  */
 export const initSentry = (dsn: string) => {
+    if (!dsn) return;
     Sentry.init({
         dsn,
-        integrations: [
-            new Integrations.BrowserTracing(),
-        ],
         tracesSampleRate: 1.0, // Adjust this value in production
     });
 };
@@ -24,9 +21,7 @@ export const initSentry = (dsn: string) => {
  */
 export const logError = (error: Error, context?: string) => {
     Sentry.captureException(error, {
-        extra: {
-            context,
-        },
+        extra: { context },
     });
 };
 

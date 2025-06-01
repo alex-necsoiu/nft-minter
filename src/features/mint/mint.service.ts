@@ -2,8 +2,24 @@
 
 import { ethers } from 'ethers';
 import { useContractWrite, useAccount, useNetwork } from 'wagmi';
-import { NFT_CONTRACT_ABI } from './mint.types'; // Import the contract ABI
+import { Address } from 'viem';
+import { sepolia } from 'wagmi/chains';
 import { logError } from '../../utils/sentry-logger'; // Import centralized logging utility
+import Musharka721Abi from './abi/Musharka721.json';
+
+/**
+ * Returns the NFT contract config for Wagmi hooks.
+ * Replace 'erc721Abi' with your actual contract ABI if different.
+ */
+export function getNftContractConfig() {
+  const address = process.env.NEXT_PUBLIC_NFT_ADDRESS as Address;
+  if (!address) throw new Error('NFT contract address not set');
+  return {
+    address,
+    abi: Musharka721Abi,
+    chainId: 11155111,
+  };
+}
 
 // Define the minting service function
 export const mintNft = async (to: string, uri: string) => {
@@ -20,7 +36,7 @@ export const mintNft = async (to: string, uri: string) => {
     // Create a new instance of the contract
     const contract = new ethers.Contract(
       process.env.NEXT_PUBLIC_NFT_ADDRESS,
-      NFT_CONTRACT_ABI,
+      Musharka721Abi,
       new ethers.providers.Web3Provider(window.ethereum)
     );
 

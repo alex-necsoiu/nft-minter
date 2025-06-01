@@ -1,7 +1,13 @@
+import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import MintForm from '../src/features/mint/MintForm';
+import MintForm from '@/features/mint/MintForm';
 
 describe('MintForm', () => {
+  it('renders the mint form', () => {
+    render(<MintForm />);
+    expect(screen.getByText(/mint a new nft/i)).toBeInTheDocument();
+  });
+
   beforeEach(() => {
     render(<MintForm />);
   });

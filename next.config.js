@@ -1,8 +1,8 @@
 // This file contains configuration settings for the Next.js application, allowing customization of the build process and server behavior.
 
+/** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  swcMinify: true,
   images: {
     domains: ['ipfs.io', 'your-image-domain.com'], // Add any image domains you will be using
   },
