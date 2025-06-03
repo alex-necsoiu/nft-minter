@@ -9,21 +9,21 @@ export class WalletConnectorsService {
           target: 'metaMask',
           shimDisconnect: true,
         });
-      case 'portis':
-        return injected({
-          target: 'portis',
-          shimDisconnect: true,
-        });
-      case 'torus':
-        return injected({
-          target: 'torus',
-          shimDisconnect: true,
-        });
-      case 'walletlink':
-        return injected({
-          target: 'walletlink',
-          shimDisconnect: true,
-        });
+      // case 'portis':
+      //   return injected({
+      //     target: 'portis',
+      //     shimDisconnect: true,
+      //   });
+      // case 'torus':
+      //   return injected({
+      //     target: 'torus',
+      //     shimDisconnect: true,
+      //   });
+      // case 'walletlink':
+      //   return injected({
+      //     target: 'walletlink',
+      //     shimDisconnect: true,
+      //   });
       default:
         throw new Error(`Unsupported wallet type: ${walletType}`);
     }
