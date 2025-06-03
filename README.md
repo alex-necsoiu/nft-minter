@@ -1,112 +1,158 @@
-# NFT Minting Application
+# 🖼️ NFT Minter dApp
 
-This is a decentralized application (dApp) for connecting a wallet and minting ERC721 NFTs on the Sepolia testnet. Users can upload an image, provide a title and description, and mint their unique NFT.
+A full-stack, gas-fee–aware decentralized application (dApp) built with **React**, **Next.js (App Router)**, **TypeScript**, **TailwindCSS**, **Wagmi**, and **Viem**. It enables users to connect their wallet and mint NFTs on the **Sepolia Ethereum testnet**. Image and metadata are uploaded to **IPFS via Pinata**, and the mint function interacts with an ERC-721 smart contract.
 
-## Architecture
+---
 
-The application follows a **feature-first (domain-based)** architecture using the **Next.js App Router**. Key technologies and patterns include:
+## 📚 Table of Contents
 
--   **React & TypeScript:** For building the user interface with strong typing.
--   **Next.js App Router:** Providing server-side rendering (SSR), API routes, and file-system based routing.
--   **Tailwind CSS:** For utility-first styling.
--   **Wagmi:** A React hook library for interacting with Ethereum and EVM chains.
--   **Viem:** A TypeScript interface for Ethereum that handles blockchain interactions.
--   **@tanstack/react-query:** For managing asynchronous data fetching and state, used by Wagmi.
--   **Pinata:** An IPFS pinning service used for storing NFT images and metadata (via a serverless API route).
--   **Serverless API Route:** Used to handle the secure interaction with the Pinata API keys for IPFS uploads.
+1. [Overview](#overview)
+2. [Tech Stack](#tech-stack)
+3. [Features](#features)
+4. [Figma Design](#figma-design)
+5. [Project Structure](#project-structure)
+6. [Environment Variables](#environment-variables)
+7. [Usage](#usage)
+8. [Testing](#testing)
+9. [Screenshots](#screenshots)
 
-The codebase is organized into features (e.g., `mint`, `ipfs`, `wallet`) under the `/features` directory, containing components, hooks, services, and types specific to that domain.
+---
 
-## Components
+## 🧩 Overview
 
--   **MintForm:** The main form component on the minting page where users input NFT details (title, description, image) and trigger the minting process. Includes form validation and UI state management (loading, errors, success).
--   **ErrorAlert & SuccessAlert (under `components/ui`):** Reusable UI components for displaying dismissible error and success messages to the user.
--   **ConnectButton (Implicitly used via Wagmi):** While not a custom component in this structure, wallet connection is handled by integrating with Wagmi's hooks and potentially a library like `@rainbow-me/rainbowkit` or similar, which provides pre-built connection UI.
+This app allows users to mint NFTs using a user-friendly form. Upon submission, the app:
 
-## File Structure and Explanation
+- Uploads the image to IPFS via Pinata
+- Generates compliant metadata JSON using the [OpenSea Metadata Standard](https://docs.opensea.io/docs/metadata-standards)
+- Uploads metadata to IPFS
+- Calls the `mint(to, uri)` function on a deployed ERC-721 contract via Wagmi
 
-Here's an overview of the key directories and files in the project:
+---
 
--   `app/`:
-    -   `layout.tsx`: The root layout of the application, setting up the HTML structure and including global providers like `WagmiProvider` and `QueryClientProvider`.
-    -   `page.tsx`: The main page component, likely rendering the `MintForm` or the entry point for the minting feature.
-    -   `globals.css`: Global styles, including Tailwind CSS imports.
-    -   `api/`:
-        -   `ipfs/`:
-            -   `upload/`:
-                -   `route.ts`: A Next.js serverless API route that handles receiving the NFT image file and metadata, uploading them to Pinata using server-side environment variables, and returning the IPFS URLs.
+## 🛠 Tech Stack
 
--   `components/`:
-    -   `ui/`: Contains UI components, potentially generated or customized from a library like Shadcn/UI.
-        -   `button.tsx`, `input.tsx`, `textarea.tsx`, `label.tsx`, etc.: Basic form and UI elements.
-        -   `error-alert.tsx`: Reusable component for displaying error messages.
-        -   `success-alert.tsx`: Reusable component for displaying success messages.
+| Layer         | Tech                              |
+|---------------|-----------------------------------|
+| Frontend      | React, Next.js App Router, Tailwind |
+| Web3          | wagmi v2, viem                    |
+| Styling       | TailwindCSS                       |
+| Decentralized Storage | Pinata (IPFS)             |
+| Smart Contract | ERC721 (Sepolia testnet)         |
+| Wallet Support| Injected (MetaMask)               |
 
--   `features/`:
-    -   `ipfs/`:
-        -   `services/`:
-            -   `ipfs.service.ts`: Client-side service class that provides an interface to interact with the `/api/ipfs/upload` serverless function.
-        -   `types/`:
-            -   `ipfs.types.ts`: TypeScript types for IPFS-related data structures and API responses.
-        -   `utils/`:
-            -   `file-validation.ts`: Utility functions for validating file properties (e.g., size, type) before upload.
-    -   `mint/`:
-        -   `components/`:
-            -   `MintForm.tsx`: The React component for the NFT minting form.
-        -   `hooks/`:
-            -   `use-mint.ts`: A custom React hook encapsulating the minting logic, including calling the `MintService`, interacting with Wagmi hooks (`useContractWrite`, `useWaitForTransactionReceipt`, `useAccount`, `useChainId`), and managing the state of the minting process.
-        -   `services/`:
-            -   `mint.service.ts`: A service class responsible for orchestrating the minting preparation. It takes form data, interacts with the `IpfsService` to upload data, structures the NFT metadata, and prepares the necessary configuration (`request` object) for the Wagmi `writeContract` hook.
-        -   `types/`:
-            -   `mint.types.ts`: TypeScript types specific to the minting feature, such as form data structure, contract arguments, and the minting process state.
-    -   `wallet/`:
-        -   `hooks/`:
-            -   `use-wallet.ts`: A custom hook for wallet connection logic (might be less central now with direct Wagmi `useAccount` usage in features).
+---
 
--   `lib/`:
-    -   `config/`:
-        -   `wagmi.ts`: Configuration for the Wagmi client, specifying supported chains (Sepolia), connectors (MetaMask, WalletConnect, Injected), and transport layers.
-        -   `ipfs.ts`: Configuration related to IPFS, like the IPFS gateway URL.
-    -   `contracts/`:
-        -   `nft.ts`: Contains the NFT smart contract address and ABI (Application Binary Interface).
-    -   `providers/`:
-        -   `WagmiProvider.tsx`: A wrapper component that sets up the Wagmi and `@tanstack/react-query` contexts for the application.
-    -   `types/`:
-        -   `nft.ts`: Shared TypeScript types, including the `NFTMetadata` structure.
-    -   `utils.ts`: General utility functions used across the application (e.g., `cn` for conditional class names).
+## ✨ Features
 
--   `public/`:
-    -   Contains static assets served directly by Next.js (e.g., `upload.svg` used in the form).
+- ✅ Wallet connection (Injected)
+- ✅ Image + metadata upload to IPFS via Pinata
+- ✅ Fully responsive minting form with validation
+- ✅ Confirmation screen with wallet transaction feedback
+- ✅ Error/success feedback with dismissible alerts
+- ✅ Follows [cursor.rules.json](./cursor.rules.json) conventions
 
--   `.env.local`:
-    -   Environment variables file. **This file should not be committed to version control.** It should contain sensitive keys and configuration values like:
-        -   `PINATA_API_KEY`
-        -   `PINATA_SECRET_API_KEY`
-        -   `NEXT_PUBLIC_CHAIN_ID`
-        -   `NEXT_PUBLIC_ALCHEMY_ENDPOINT`
-        -   `NEXT_PUBLIC_NFT_ADDRESS`
-        -   `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID`
+---
 
-## Setup and Installation
+## 🎨 Figma Design
 
-1.  Clone the repository.
-2.  Install dependencies:
-    ```bash
-    yarn install
-    # or npm install
-    ```
-3.  Create a `.env.local` file in the root directory and add your environment variables (Pinata keys, contract address, etc.). Refer to the `.env.local` section above.
-4.  Run the development server:
-    ```bash
-    yarn dev
-    # or npm run dev
-    ```
-5.  Open your browser to `http://localhost:3000` (or the port shown in your terminal).
+Design reference:  
+[🔗 View Figma Mockup](https://www.figma.com/design/vX6RLjk87SFnhZVoIajbes/Untitled?node-id=0-1)
 
-## Contributing
+Implemented Screens:
+- [x] Wallet Connection
+- [x] NFT Minting Form
+- [x] Confirmation Modal
 
-(Optional section for contribution guidelines)
+---
 
-## License
+## 🗂 Project Structure
 
-(Optional section for licensing information)
+```
+.
+├── app/                      # App router pages and APIs
+│   └── api/ipfs/upload       # IPFS upload API route
+├── components/               # UI and shared components
+├── features/                 # Domain-driven logic
+│   ├── ipfs/                 # IPFS upload service, types, and validation
+│   ├── mint/                 # Mint form, logic and hooks
+│   └── wallet/               # Wallet connection service
+├── lib/                      # Configs and contract wrappers
+├── public/                   # Static assets
+├── styles/                  # Tailwind globals
+└── ...
+```
+
+---
+
+## 🔐 Environment Variables
+
+```env
+NEXT_PUBLIC_CHAIN_ID=11155111
+NEXT_PUBLIC_ALCHEMY_ENDPOINT=https://eth-sepolia.g.alchemy.com/v2/your-key
+NEXT_PUBLIC_NFT_ADDRESS=0xc507d4FbD9b5Bd102668c00a3eF7ec68bF95C6A1
+PINATA_API_KEY=your-pinata-api-key
+PINATA_SECRET_API_KEY=your-pinata-secret-key
+```
+
+---
+
+## 🚀 Usage
+
+### 1. Install dependencies
+
+```bash
+yarn install
+```
+
+### 2. Run the dev server
+
+```bash
+yarn dev
+```
+
+### 3. Connect MetaMask and mint NFTs
+
+- Ensure you're on the **Sepolia Testnet**
+- Mint via the form at `/`
+
+---
+
+## ✅ Testing
+
+The following parts of the application are tested:
+
+| Unit                         | Status     |
+|-----------------------------|------------|
+| IPFS image validation       | ✅ Fully covered via `file-validation.ts` tests
+| Metadata upload util        | ✅ Unit tested with mocked Pinata
+| Minting hook (`use-mint.ts`)| ✅ Mocked contract call flow
+| Wallet connection           | 🔶 Smoke tested manually
+| API IPFS route (`route.ts`) | ✅ Integration tested with form
+
+Test coverage focuses on validating:
+- Max file size (≤ 5MB)
+- Metadata generation format
+- Pinata upload behavior
+- Wagmi contract interaction via mocks
+
+Run tests:
+
+```bash
+yarn test
+```
+
+---
+
+## 📸 Screenshots
+
+### 📍 NFT Mint Form
+![Mint Form](./public/screenshot-mint.png)
+
+### ✅ Confirmation Modal
+![Confirmation](./public/screenshot-confirmation.png)
+
+---
+
+## 📝 License
+
+MIT © 2025 Alex Necsoiu
