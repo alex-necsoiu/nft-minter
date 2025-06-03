@@ -1,5 +1,21 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Enable SWC minification
+  swcMinify: true,
+  // Disable Babel
+  experimental: {
+    forceSwcTransforms: true,
+  },
+  // Configure webpack to handle large files
+  webpack: (config, { isServer }) => {
+    // Increase the size limit for large files
+    config.performance = {
+      ...config.performance,
+      maxAssetSize: 1000000,
+      maxEntrypointSize: 1000000,
+    };
+    return config;
+  },
   async headers() {
     return [
       {

@@ -11,11 +11,12 @@ export const useMint = () => {
   const { address, chain, isConnected } = useAccount();
   const chainId = useChainId();
 
-  const [mintState, setMintState] = useState<MintProcessResult & { isLoading: boolean; status: 'idle' | 'preparing' | 'uploading' | 'prompting' | 'mining' | 'success' | 'error' }>({
+  const [mintState, setMintState] = useState<MintProcessResult & { isLoading: boolean; status: 'idle' | 'preparing' | 'uploading' | 'prepared' | 'prompting' | 'mining' | 'success' | 'error', preparedRequest?: any }>({
       success: false,
       isLoading: false,
       status: 'idle',
-      error: undefined
+      error: undefined,
+      preparedRequest: undefined,
   });
 
   const mintService = new MintService();
@@ -50,6 +51,7 @@ export const useMint = () => {
                isLoading: false,
                status: 'error',
                error: writeError.message,
+               preparedRequest: undefined, // Clear prepared request on error
            }));
       } else if (confirmationError) {
            console.error('useMint useEffect: Wagmi confirmation error:', confirmationError);
@@ -59,6 +61,7 @@ export const useMint = () => {
                 isLoading: false,
                 status: 'error',
                 error: confirmationError.message,
+                preparedRequest: undefined, // Clear prepared request on error
             }));
       } else if (isTransactionSuccessful) {
           console.log('useMint useEffect: Wagmi transaction successful:', hash);
@@ -69,6 +72,7 @@ export const useMint = () => {
               isLoading: false,
               status: 'success',
               error: undefined,
+              preparedRequest: undefined, // Clear prepared request on success
           }));
       } else if (hash && !isWritingContract && !isConfirmingTransaction && mintState.status !== 'success' && mintState.status !== 'mining') {
            console.log('useMint useEffect: Transaction sent, waiting for confirmation:', hash);
@@ -89,6 +93,7 @@ export const useMint = () => {
               transactionHash: undefined,
               ipfsImageUrl: undefined,
               ipfsMetadataUrl: undefined,
+              preparedRequest: undefined,
           });
       }
   }, [writeError, confirmationError, isTransactionSuccessful, hash, isWritingContract, isConfirmingTransaction, address, isConnected, mintState.status, chain?.id]);
@@ -107,7 +112,7 @@ export const useMint = () => {
     }
     */
 
-    setMintState({ success: false, isLoading: true, status: 'preparing', transactionHash: undefined, ipfsImageUrl: undefined, ipfsMetadataUrl: undefined, error: undefined });
+    setMintState({ success: false, isLoading: true, status: 'preparing', transactionHash: undefined, ipfsImageUrl: undefined, ipfsMetadataUrl: undefined, error: undefined, preparedRequest: undefined });
     resetWrite();
 
     try {
@@ -126,29 +131,76 @@ export const useMint = () => {
           args: [address, request.args[1]],
       };
 
+      console.log('useMint: IPFS upload complete, request prepared.', finalRequest);
       setMintState(prevState => ({
         ...prevState,
         ipfsImageUrl: ipfsImageUrl,
         ipfsMetadataUrl: ipfsMetadataUrl,
-        status: 'prompting',
-        isLoading: true,
+        status: 'prepared', // New status: ready for transaction prompt
+        isLoading: false, // Not loading while waiting for user prompt
         error: undefined,
+        preparedRequest: finalRequest, // Store the prepared request
       }));
 
-      await writeContract(finalRequest);
-
-      console.log('useMint: Contract write call initiated. Wagmi state will update.');
+      // IMPORTANT: Do NOT call writeContract here anymore.
+      // await writeContract(finalRequest);
+      // console.log('useMint: Contract write call initiated. Wagmi state will update.');
 
     } catch (err: any) {
       console.error('useMint: Error during mint process before contract write:', err);
-      setMintState({ success: false, isLoading: false, status: 'error', error: err instanceof Error ? err.message : 'An unexpected error occurred during minting preparation.' });
+      setMintState({ success: false, isLoading: false, status: 'error', error: err instanceof Error ? err.message : 'An unexpected error occurred during minting preparation.', preparedRequest: undefined });
     }
 
-  }, [address, chain?.id, isConnected, mintService, writeContract, resetWrite]);
+  }, [address, chain?.id, isConnected, mintService, resetWrite]);
+
+  const confirmMintTransaction = useCallback(async () => {
+      if (!mintState.preparedRequest) {
+          console.error('useMint: No prepared request found for transaction confirmation.');
+          setMintState(prevState => ({ ...prevState, success: false, isLoading: false, status: 'error', error: 'Mint data not prepared.' }));
+          return;
+      }
+
+      setMintState(prevState => ({ ...prevState, status: 'prompting', isLoading: true, error: undefined }));
+
+      try {
+          console.log('useMint: Calling writeContract...', mintState.preparedRequest);
+          await writeContract(mintState.preparedRequest); // Call writeContract here
+          // Wagmi hooks will handle status updates from here (isWritingContract, isConfirmingTransaction)
+      } catch (err: any) {
+           console.error('useMint: Error during contract write prompt:', err);
+           // Wagmi's useContractWrite hook error will also update state, 
+           // but we can add a specific state update here if needed
+           setMintState(prevState => ({
+               ...prevState,
+               success: false,
+               isLoading: false,
+               status: 'error',
+               error: err instanceof Error ? err.message : 'Failed to prompt wallet transaction.',
+               preparedRequest: undefined, // Clear prepared request on error
+           }));
+      }
+  }, [mintState.preparedRequest, writeContract]);
+
+  const resetMintProcess = useCallback(() => {
+      console.log('useMint: Resetting mint process state.');
+      setMintState({
+          success: false,
+          isLoading: false,
+          status: 'idle',
+          error: undefined,
+          transactionHash: undefined,
+          ipfsImageUrl: undefined,
+          ipfsMetadataUrl: undefined,
+          preparedRequest: undefined,
+      });
+      resetWrite(); // Also reset wagmi's useContractWrite state
+  }, [resetWrite]);
 
   return {
     mintState,
-    mintNFT,
+    mintNFT, // This now only prepares data
+    confirmMintTransaction, // New function to trigger the contract write
+    resetMintProcess, // New function to reset the mint process state
     isWritingContract,
     isConfirmingTransaction,
     error

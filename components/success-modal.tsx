@@ -28,21 +28,30 @@ export default function SuccessModal({ isOpen, onClose, onContinue }: SuccessMod
           </div>
 
           {/* Title */}
-          <h2 className="text-2xl font-bold mb-4">Dorippa Panthera</h2>
+          <h2 className="text-2xl font-bold mb-4">Confirm Minting</h2>
 
           {/* Description */}
           <p className="text-gray-400 text-sm leading-relaxed mb-8">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Amet, a habitant a consequat elementum nisl.
-            Phasellus facilisis urna facilisis aliquet.
+          You’re about to mint this NFT. This action will require a small gas fee to finalize the transaction on the blockchain.
+          Please confirm in your wallet to proceed.
           </p>
 
-          {/* Continue Button */}
-          <Button
-            onClick={onContinue}
-            className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white h-12 text-base border-0"
-          >
-            Continue
-          </Button>
+          {/* Action Buttons */}
+          <div className="flex justify-center gap-4 mt-4">
+            <Button
+              onClick={onContinue}
+              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white h-12 text-base border-0"
+            >
+              Confirm
+            </Button>
+             <Button
+              onClick={onClose}
+              variant="outline"
+              className="w-full bg-gray-700 border-gray-600 text-white hover:bg-gray-600 h-12 text-base"
+            >
+              Cancel
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>

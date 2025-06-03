@@ -11,4 +11,4 @@ export interface WalletConnectOptions {
   onError?: (error: Error) => void;
 }
 
-export type WalletType = 'metaMask' | 'portis' | 'torus' | 'walletlink';
+export type WalletType = 'metaMask' | 'walletConnect' | 'portis' | 'torus' | 'walletlink';

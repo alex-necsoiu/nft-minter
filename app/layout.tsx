@@ -3,7 +3,13 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import { WagmiProvider } from '@/lib/providers/WagmiProvider'
 
-const inter = Inter({ subsets: ['latin'] })
+// Initialize the font with display swap for better performance
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  preload: true,
+  fallback: ['system-ui', 'arial'],
+})
 
 export const metadata: Metadata = {
   title: 'NFT Minting App',

@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
 import { WalletType } from '../types/wallet.types';
 import { getWalletDisplayName } from '../utils/wallet-validation';
+import { logger } from '@/lib/utils/logger';
 
 interface WalletConnectModalProps {
   isOpen: boolean;
@@ -14,12 +15,12 @@ interface WalletConnectModalProps {
 export const WalletConnectModal = ({ isOpen, onClose, onConnect }: WalletConnectModalProps) => {
   if (!isOpen) return null;
 
-  const walletTypes: WalletType[] = ['metaMask', 'portis', 'torus', 'walletlink'];
+  const walletTypes: WalletType[] = ['metaMask', 'walletConnect', 'portis', 'torus', 'walletlink'];
 
   return (
     <div className="fixed inset-0 z-50 flex">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
 
       {/* Modal */}
       <div className="relative ml-auto w-96 h-full bg-gray-900 text-white p-6 shadow-2xl">
@@ -41,7 +42,10 @@ export const WalletConnectModal = ({ isOpen, onClose, onConnect }: WalletConnect
               key={walletType}
               variant="outline"
               className="w-full justify-start bg-gray-800 border-gray-700 text-white hover:bg-gray-700 h-14"
-              onClick={() => onConnect(walletType)}
+              onClick={() => {
+                logger.info('Wallet type selected', { walletType });
+                onConnect(walletType);
+              }}
             >
               <img 
                 src={`/${walletType}.svg`} 
@@ -56,7 +60,13 @@ export const WalletConnectModal = ({ isOpen, onClose, onConnect }: WalletConnect
         <div className="mt-8">
           <p className="text-gray-400 text-sm">
             {"Don't have a wallet? "}
-            <a href="#" className="text-blue-400 hover:underline">
+            <a 
+              href="https://metamask.io/download/" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="text-blue-400 hover:underline"
+              onClick={() => logger.info('Learn more link clicked')}
+            >
               Learn more
             </a>
           </p>

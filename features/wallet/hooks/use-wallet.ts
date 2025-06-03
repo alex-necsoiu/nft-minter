@@ -9,12 +9,12 @@ import { getWalletDisplayName } from '../utils/wallet-validation';
 import { CONTRACT_CONFIG } from '@/lib/config/contract';
 
 export const useWallet = () => {
-  const [error, setError] = useState<string>();
+  const [error, setError] = useState<string | undefined>();
   const [isConnectingSpecificWallet, setIsConnectingSpecificWallet] = useState<WalletType | null>(null);
 
   const { address, isConnected } = useAccount();
   const chainId = useChainId();
-  const { connect, connectors, isConnecting: isWagmiConnecting, error: wagmiError } = useConnect();
+  const { connect, connectors, isPending: isWagmiConnecting, error: wagmiError } = useConnect();
   const { disconnect } = useDisconnect();
   const { switchChain, isPending: isSwitchingChain, error: switchChainError } = useSwitchChain();
 
@@ -76,13 +76,13 @@ export const useWallet = () => {
     console.log('Attempting to switch to Sepolia');
     setError(undefined);
     try {
-      if (switchChain) {
-        await switchChain({ chainId: CONTRACT_CONFIG.chainId });
-        console.log('Switch chain call initiated');
-      } else {
+      if (!switchChain) {
         console.warn('switchChain function not available');
         setError("Network switching not supported by this wallet.");
+        return;
       }
+      await switchChain({ chainId: CONTRACT_CONFIG.chainId });
+      console.log('Switch chain call initiated');
     } catch (err) {
       console.error('Error during switch chain attempt:', err);
       setError(err instanceof Error ? err.message : 'Failed to switch network');
@@ -111,7 +111,7 @@ export const useWallet = () => {
     address,
     chainId,
     isConnecting,
-    error: error || switchChainError,
+    error: error || (switchChainError?.message),
   };
 
   return {

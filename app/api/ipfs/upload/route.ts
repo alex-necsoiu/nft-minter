@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import pinataSDK from '@pinata/sdk';
 import { NFTMetadata } from '@/lib/types/nft'; // Assuming NFTMetadata is needed here
 import { IPFS_GATEWAY } from '@/lib/config/ipfs'; // Assuming IPFS_GATEWAY is needed here
+// Import stream utilities for Node.js
+import { Readable } from 'stream';
 
 // Ensure Pinata keys are only accessed on the server
 const pinataApiKey = process.env.PINATA_API_KEY;
@@ -15,6 +17,30 @@ if (!pinataApiKey || !pinataSecretKey) {
 
 // Instantiate Pinata SDK on the server
 const pinata = new pinataSDK(pinataApiKey, pinataSecretKey);
+
+// Helper function to convert WHATWG stream to Node.js stream
+function convertWebStreamToNodeStream(webStream: ReadableStream<Uint8Array>): Readable {
+    const nodeStream = new Readable({
+        read() {},
+    });
+    const reader = webStream.getReader();
+
+    function read() {
+        reader.read().then(({ done, value }) => {
+            if (done) {
+                nodeStream.push(null);
+                return;
+            }
+            nodeStream.push(Buffer.from(value)); // Push buffer
+            read();
+        }).catch(err => {
+            nodeStream.emit('error', err);
+        });
+    }
+
+    read();
+    return nodeStream;
+}
 
 // POST handler for /api/ipfs/upload
 export async function POST(request: Request) {
@@ -38,8 +64,11 @@ export async function POST(request: Request) {
   }
 
   try {
+    console.log('Attempting to parse form data...');
     // Parse the incoming FormData
     const formData = await request.formData();
+    console.log('Form data parsed.');
+
     const file = formData.get('file') as File | null;
     const metadataJsonString = formData.get('metadata') as string | null; // Assuming metadata comes as a JSON string
 
@@ -61,7 +90,9 @@ export async function POST(request: Request) {
 
     let metadata: NFTMetadata;
     try {
+        console.log('Attempting to parse metadata JSON string...');
         metadata = JSON.parse(metadataJsonString);
+        console.log('Metadata JSON string parsed.');
         // Optional: Add validation for metadata structure here
     } catch (parseError) {
          console.error('Failed to parse metadata JSON string:', parseError);
@@ -72,14 +103,18 @@ export async function POST(request: Request) {
     }
 
 
-    console.log('File and metadata received. Uploading to Pinata...');
+    console.log('File and metadata received. Converting web stream to Node.js stream for Pinata upload...');
+    // Convert the WHATWG stream to a Node.js ReadableStream
+    const fileStream = convertWebStreamToNodeStream(file.stream());
+    console.log('Stream converted. Uploading file to Pinata...');
 
     // Upload file to Pinata
-    const fileUploadResult = await pinata.pinFileToIPFS(file.stream() as any, {
+    const fileUploadResult = await pinata.pinFileToIPFS(fileStream, {
         pinataMetadata: { name: file.name }, // Use file name for Pinata pin metadata
     });
 
-    console.log('Pinata file upload result:', fileUploadResult);
+    console.log('Pinata file upload result received.');
+    console.log('File upload result:', fileUploadResult);
 
     if (!fileUploadResult || !fileUploadResult.IpfsHash) {
         console.error('Pinata file upload failed or returned no hash:', fileUploadResult);
@@ -90,8 +125,9 @@ export async function POST(request: Request) {
     }
 
     const ipfsImageUrl = `${IPFS_GATEWAY}/${fileUploadResult.IpfsHash}`;
-     console.log('File uploaded, IPFS URL:', ipfsImageUrl);
+     console.log('File uploaded successfully, IPFS URL:', ipfsImageUrl);
 
+    console.log('Attempting to upload metadata JSON to Pinata...');
     // Update metadata to use the new IPFS image URL
     const updatedMetadata: NFTMetadata = {
         ...metadata,
@@ -103,7 +139,8 @@ export async function POST(request: Request) {
         pinataMetadata: { name: `${metadata.name}_metadata` }, // Use metadata name for the pin
     });
 
-     console.log('Pinata metadata upload result:', metadataUploadResult);
+     console.log('Pinata metadata upload result received.');
+     console.log('Metadata upload result:', metadataUploadResult);
 
     if (!metadataUploadResult || !metadataUploadResult.IpfsHash) {
          console.error('Pinata metadata upload failed or returned no hash:', metadataUploadResult);
@@ -115,9 +152,10 @@ export async function POST(request: Request) {
     }
 
      const ipfsMetadataUrl = `${IPFS_GATEWAY}/${metadataUploadResult.IpfsHash}`;
-     console.log('Metadata uploaded, IPFS URL:', ipfsMetadataUrl);
+     console.log('Metadata uploaded successfully, IPFS URL:', ipfsMetadataUrl);
 
     // Return successful response with IPFS hashes/URLs
+    console.log('IPFS upload process completed successfully.');
     return NextResponse.json(
       {
         success: true,
@@ -127,8 +165,19 @@ export async function POST(request: Request) {
       { status: 200 }
     );
 
-  } catch (error) {
+  } catch (error: any) { // Catching as 'any' to ensure we can access error properties
     console.error('An unexpected error occurred during IPFS upload:', error);
+    // Log specific error details if available
+    if (error instanceof Error) {
+        console.error('Error details:', {
+            message: error.message,
+            name: error.name,
+            stack: error.stack // Include stack trace for better debugging
+        });
+    } else if (typeof error === 'object' && error !== null) {
+        console.error('Non-Error object caught:', error);
+    }
+
     return NextResponse.json(
       { success: false, error: 'An unexpected server error occurred during IPFS upload.' },
       { status: 500 }

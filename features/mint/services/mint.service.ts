@@ -30,12 +30,36 @@ export class MintService {
   async prepareMint(file: File, metadataInput: Omit<NFTMetadata, 'image'>): Promise<MintPreparationResult> {
     console.log('MintService: Preparing mint...'); // Debug log
     try {
+      // Validate metadata
+      if (!metadataInput.name) {
+        throw new Error('NFT name is required');
+      }
+      if (!metadataInput.description) {
+        throw new Error('NFT description is required');
+      }
+
+      // Validate file
+      if (!file) {
+        throw new Error('Image file is required');
+      }
+
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        throw new Error('Only image files are allowed');
+      }
+
+      // Validate file size (5MB limit)
+      const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
+      if (file.size > MAX_FILE_SIZE) {
+        throw new Error('Image file size must be less than 5MB');
+      }
+
       // 1. Upload to IPFS using the dedicated upload function (via API)
       console.log('MintService: Calling uploadNFTData (via API)'); // Debug log
       
       // Map the form data to match NFTMetadata format (without image)
       const metadataForUpload: Omit<NFTMetadata, 'image'> = {
-          name: metadataInput.name, // Use name from the updated input type
+          name: metadataInput.name,
           description: metadataInput.description,
       };
 
@@ -73,12 +97,39 @@ export class MintService {
 
     } catch (error: any) {
       console.error('MintService: Error during mint preparation:', error); // Debug log
-      throw new Error(error.message || 'An error occurred during mint preparation in the service.');
+      throw error; // Propagate the original error
     }
   }
 
   async prepareMintFromFile(file: File, metadata: NFTMetadata) {
     try {
+      // Validate metadata
+      if (!metadata.name) {
+        throw new Error('NFT name is required');
+      }
+      if (!metadata.description) {
+        throw new Error('NFT description is required');
+      }
+      if (!metadata.image) {
+        throw new Error('NFT image URL is required in metadata');
+      }
+
+      // Validate file
+      if (!file) {
+        throw new Error('Image file is required');
+      }
+
+      // Validate file type (optional depending on whether the API handles this)
+      if (!file.type.startsWith('image/')) {
+        throw new Error('Only image files are allowed');
+      }
+
+      // Validate file size (5MB limit, optional depending on API)
+      const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB in bytes
+      if (file.size > MAX_FILE_SIZE) {
+        throw new Error('Image file size must be less than 5MB');
+      }
+
       const { success, ipfsImageUrl, ipfsMetadataUrl, error } = await this.ipfsService.uploadNFTData(file, metadata);
 
       if (!success || !ipfsImageUrl || !ipfsMetadataUrl) {
@@ -96,7 +147,7 @@ export class MintService {
       return { request, ipfsImageUrl, ipfsMetadataUrl };
     } catch (error) {
       console.error('Mint preparation error:', error);
-      throw error;
+      throw error; // Propagate the original error
     }
   }
 
