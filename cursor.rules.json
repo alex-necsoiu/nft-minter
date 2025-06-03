@@ -1,0 +1,53 @@
+{
+  "$schema": "https://raw.githubusercontent.com/cursor-dev/cursor.rules/main/schema.json",
+  "rules": [
+    {
+      "description": "Use domain-based (feature-first) folder structure under /features to organize components, services, and hooks by feature.",
+      "enforcement": "hard"
+    },
+    {
+      "description": "React component filenames must use PascalCase (e.g., MintForm.tsx).",
+      "enforcement": "hard"
+    },
+    {
+      "description": "All non-component files (services, utils, hooks) and folders must use kebab-case (e.g., mint.service.ts, use-wallet.ts).",
+      "enforcement": "hard"
+    },
+    {
+      "description": "Wrap all async contract interactions and IPFS uploads in try/catch blocks. Log all caught errors to a centralized logging service (e.g., Sentry).",
+      "enforcement": "soft"
+    },
+    {
+      "description": "Use Wagmi hooks for wallet state and contract interaction (e.g., useAccount, useNetwork, useContractWrite).",
+      "enforcement": "hard"
+    },
+    {
+      "description": "Create consistent and descriptive function names for contract calls (e.g., mintNft, uploadMetadataToIpfs).",
+      "enforcement": "hard"
+    },
+    {
+      "description": "Validate wallet connection and network (Sepolia) before performing any mint action.",
+      "enforcement": "hard"
+    },
+    {
+      "description": "Before uploading images to IPFS, validate file type (image only) and size (e.g., <5MB).",
+      "enforcement": "soft"
+    },
+    {
+      "description": "Use centralized utility modules for IPFS and contract services (e.g., /features/mint/mint.service.ts).",
+      "enforcement": "hard"
+    },
+    {
+      "description": "Write unit tests for all critical logic: wallet connection, IPFS upload, smart contract calls, and form validation. Use mocks where applicable.",
+      "enforcement": "soft"
+    },
+    {
+      "description": "When writing documentation, README files, technical writing, or comments, follow Google's Technical Writing Style Guide for clarity, tone, and grammar.",
+      "enforcement": "hard"
+    },
+    {
+      "description": "Always include clear and concise comments in generated code. Comments should reflect the understanding of a senior software engineer and explain why code exists, not just what it does.",
+      "enforcement": "hard"
+    }
+  ]
+}
