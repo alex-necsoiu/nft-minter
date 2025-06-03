@@ -2,6 +2,8 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { WagmiProvider } from '@/lib/providers/WagmiProvider'
+import '@rainbow-me/rainbowkit/styles.css';
+import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -20,7 +22,9 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <WagmiProvider>
-          {children}
+          <RainbowKitProvider>
+            {children}
+          </RainbowKitProvider>
         </WagmiProvider>
       </body>
     </html>

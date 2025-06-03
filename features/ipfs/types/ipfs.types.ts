@@ -11,3 +11,12 @@ export interface NFTMetadataUploadResponse {
 }
 
 // You might add types for Pinata specific responses if needed, but these are sufficient for the service
+export interface NFTMetadata {
+  name: string;
+  description: string;
+  image: string;
+  attributes?: {
+    trait_type: string;
+    value: string | number;
+  }[];
+}

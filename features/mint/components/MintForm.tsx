@@ -15,16 +15,18 @@ import { useAccount } from 'wagmi';
 const mintFormSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   description: z.string().min(1, 'Description is required'),
-  image: z.instanceof(File).refine((file) => file.size <= 5 * 1024 * 1024, 'File size must be less than 5MB'),
+  image: z
+    .instanceof(File)
+    .refine((file) => file.size <= 5 * 1024 * 1024, 'File size must be less than 5MB'),
 });
 
 type MintFormData = z.infer<typeof mintFormSchema>;
 
 export function MintForm() {
-  const { isConnected, chain } = useAccount();
-  const { mintNFT, mintState, error } = useMint();
+  const { isConnected } = useAccount();
+  const { mintNFT, isSuccess, error } = useMint();
   const [dismissedError, setDismissedError] = useState<string | null>(null);
-  const [dismissedSuccess, setDismissedSuccess] = useState<string | null>(null);
+  const [dismissedSuccess, setDismissedSuccess] = useState<boolean>(false);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
 
   const {
@@ -36,6 +38,7 @@ export function MintForm() {
     watch,
   } = useForm<MintFormData>({
     resolver: zodResolver(mintFormSchema),
+    mode: 'onChange',
   });
 
   const onSubmit = async (data: MintFormData) => {
@@ -48,26 +51,18 @@ export function MintForm() {
     }
   };
 
-  const handleDismissError = () => {
-    setDismissedError(error || null);
-  };
-
-  const handleDismissSuccess = () => {
-    setDismissedSuccess(mintState.transactionHash || null);
-  };
-
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       setSelectedImage(file);
-      setValue('image', file);
+      setValue('image', file, { shouldValidate: true });
     }
   };
 
   if (!isConnected) {
     return (
-      <div className="rounded-lg border p-4 text-center">
-        <p className="text-muted-foreground">Please connect your wallet to mint NFTs</p>
+      <div className="rounded-lg border border-white/20 bg-white/5 p-4 text-center text-white/60">
+        Please connect your wallet to mint NFTs.
       </div>
     );
   }
@@ -75,16 +70,13 @@ export function MintForm() {
   return (
     <div className="space-y-6">
       {error && !dismissedError && (
-        <ErrorAlert
-          message={error}
-          onDismiss={handleDismissError}
-        />
+        <ErrorAlert message={error} onDismiss={() => setDismissedError(error)} />
       )}
 
-      {mintState.success && mintState.transactionHash && !dismissedSuccess && (
+      {isSuccess && !dismissedSuccess && (
         <SuccessAlert
-          message={`NFT minted successfully! Transaction hash: ${mintState.transactionHash}`}
-          onDismiss={handleDismissSuccess}
+          message={`NFT minted successfully!`}
+          onDismiss={() => setDismissedSuccess(true)}
         />
       )}
 
@@ -141,9 +133,9 @@ export function MintForm() {
         <Button
           type="submit"
           className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white h-12 text-base border-0"
-          disabled={isSubmitting || mintState.isLoading || !isConnected || !isValid}
+          disabled={isSubmitting || !isConnected || !isValid}
         >
-          {isSubmitting || mintState.isLoading ? 'Minting...' : 'Mint NFT'}
+          {isSubmitting ? 'Minting...' : 'Mint NFT'}
         </Button>
       </form>
     </div>

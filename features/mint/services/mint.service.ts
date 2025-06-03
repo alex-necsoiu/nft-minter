@@ -99,15 +99,4 @@ export class MintService {
       throw error;
     }
   }
-
-  // Removed executeMint method as execution is handled in the hook
-  // async executeMint(request: any): Promise<`0x${string}`> {
-  //   // This logic is now handled by the useContractWrite hook in use-mint.ts
-  //   // ...
-  // }
-
-  // Placeholder for the older prepareMint logic (can be removed if not needed)
-  // async prepareMint(data: MintFormData, recipientAddress: `0x${string}`): Promise<any> {
-  //    ...
-  // }
 }

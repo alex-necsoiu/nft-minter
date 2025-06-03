@@ -1,18 +1,19 @@
 {
   "compilerOptions": {
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "target": "ESNext",                          // ⬅️ Modern target (was ES6)
+    "module": "ESNext",                          // ⬅️ Already correct
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],    // ⬅️ Capitalized properly
     "allowJs": true,
-    "target": "ES6",
     "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
     "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
+    "moduleResolution": "bundler",               // ⬅️ Good for App Router + ESM
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
+    "forceConsistentCasingInFileNames": true,    // ⬅️ Recommended for all TS projects
     "plugins": [
       {
         "name": "next"
