@@ -5,6 +5,12 @@
 /* Custom global styles can be added below this line */
 body {
     font-family: 'Inter', sans-serif; /* Example font family */
-    background-color: #f9fafb; /* Light gray background */
+    /* background-color: #f9fafb; */ /* Removed to allow page gradient */
     color: #111827; /* Dark gray text color */
+}
+
+.bg-mint-gradient {
+  background: radial-gradient(ellipse at 30% 30%, #6b3fa0 0%, #1b1536 40%, #3B2E1E 100%), 
+              radial-gradient(ellipse at 80% 70%, #ec4467 0%, #1b1536 60%, #000 100%);
+  background-blend-mode: screen;
 }

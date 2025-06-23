@@ -1,20 +1,25 @@
 /**
  * Header component for NFT Sea.
- * Displays the logo and a call-to-action button.
- * Follows Figma design and project style rules.
+ * Figma-compliant: logo with gradient, right-aligned button, and spacing.
  */
-import React from 'react'
+import React from 'react';
+import Link from "next/link";
 
 const Header: React.FC = () => (
-  <header className="flex justify-between items-center px-10 py-6">
-    <span className="text-3xl font-serif font-bold text-white tracking-wide select-none">
-      <span className="text-white">NFT</span>
-      <span className="text-accent">Sea</span>
-    </span>
-    <button className="bg-gradient-to-r from-primary to-accent text-white font-semibold rounded-md px-5 py-2 shadow-lg hover:opacity-90 transition">
-      Explore Marketplace
-    </button>
+  <header className="flex justify-between items-center p-6">
+    <div className="flex items-center">
+      <img src="/icons/logo.svg" alt="NFT Sea Logo" className="h-8 w-auto mr-3" />
+      <h1 className="text-2xl font-bold">
+        NFT <span className="text-purple-400">SEA</span>
+      </h1>
+    </div>
+    <Link href="/marketplace" passHref>
+      <button className="flex items-center border border-gray-600 text-white hover:bg-gray-800 rounded-lg px-5 py-2 transition">
+        Explore Marketplace
+        <img src="/icons/bx_wallet-alt.svg" alt="Wallet" className="w-5 h-5 ml-2" />
+      </button>
+    </Link>
   </header>
-)
+);
 
-export default Header
+export default Header;

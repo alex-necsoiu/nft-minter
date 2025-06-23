@@ -5,9 +5,13 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: '#8f5cff', // adjust to your Figma
-        accent: '#ff5cf4',  // adjust to your Figma
-        dark: '#11143B',
+        // Semantic color names for Figma compliance
+        primary: '#A259FF',        // Figma purple (button gradient start)
+        accent: '#377DF7',         // Figma blue (button gradient end)
+        dark: '#23212B',           // Figma dark card background
+        border: '#393552',         // Figma border color
+        glass: 'rgba(0,0,0,0.7)',  // Glassy overlay
+        // Existing palette (keep for legacy use)
         white: '#FFFFFF',
         orange: '#E4761B',
         orangeLight: '#F6851B',
@@ -38,7 +42,7 @@ module.exports = {
         blackGlass: '#000000AB',
       },
       backgroundImage: {
-        'main-gradient': 'linear-gradient(90deg, #627EEA 54.37%, #EC4467 111.49%)',
+        'main-gradient': 'linear-gradient(90deg, #A259FF 0%, #377DF7 100%)', // Figma button gradient
         'radial-purple': 'radial-gradient(40.39% 40.39% at 50% 50%, #DE8FFF 0%, #753DEB 45.83%, #000000 100%)',
         'radial-green': 'radial-gradient(40.39% 40.39% at 50% 50%, #34C77B 0%, #000000 100%)',
         'radial-blue': 'radial-gradient(40.39% 40.39% at 50% 50%, #627EEA 0%, #2F3C70 52.08%, #000000 100%)',
